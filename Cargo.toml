@@ -1,0 +1,6 @@
+[workspace]
+
+members = [
+    "wych_book",
+    "cli"
+]
