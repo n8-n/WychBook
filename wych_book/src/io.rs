@@ -46,9 +46,5 @@ mod tests {
     fn test_csv_file_errors() {
         let filename = concat!(env!("CARGO_MANIFEST_DIR"), "/resources/test/bad_file.csv");
         assert!(read_csv_file(&filename).is_err());
-
-        // File::create(filename).unwrap();
-        // assert!(read_csv_file(&filename).unwrap().is_empty());
-        // File::re(filename).unwrap();
     }
 }
