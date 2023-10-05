@@ -40,6 +40,14 @@ impl BookRecord {
             weight,
         }
     }
+
+    pub fn as_string_array(&self) -> [String; 3] {
+        [self.author.clone(), self.title.clone(), self.weight.to_string()]
+    }
+
+    pub fn headers() -> [&'static str; 3] {
+        ["author", "title", "weight"]
+    }
 }
 
 //
@@ -73,5 +81,11 @@ mod tests {
 
         let books = vec![BookRecord::new("A. Writer".into(), "Title1".into(), 0)];
         assert!(random_book(&books).is_none());
+    }
+
+    #[test]
+    fn test_as_string_array() {
+        let b = BookRecord::new("A. Writer".into(), "Title1".into(), 5);
+        assert_eq!(b.as_string_array(), ["A. Writer".to_string(), "Title1".into(), "5".into()]);
     }
 }
