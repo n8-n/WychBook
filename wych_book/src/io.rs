@@ -22,6 +22,19 @@ pub fn read_csv_file(filename: &str) -> Result<Vec<BookRecord>, Box<dyn Error>> 
     Ok(book_records)
 }
 
+pub fn write_csv_file(filename: &str, records: &Vec<BookRecord>) -> Result<(), Box<dyn Error>> {
+    let mut writer = csv::Writer::from_path(filename)?;
+
+    writer.write_record(&BookRecord::headers())?;
+
+    for record in records {
+        writer.write_record(&record.as_string_array())?;
+    }
+
+    writer.flush()?;
+    Ok(())
+}
+
 //
 //
 //
