@@ -41,6 +41,7 @@ pub fn write_csv_file(filename: &str, records: &Vec<BookRecord>) -> Result<(), B
 #[cfg(test)]
 mod tests {
     use super::*;
+    use tempdir::TempDir;
 
     #[test]
     fn test_reading_csv_file() {
@@ -59,5 +60,30 @@ mod tests {
     fn test_csv_file_errors() {
         let filename = concat!(env!("CARGO_MANIFEST_DIR"), "/resources/test/bad_file.csv");
         assert!(read_csv_file(&filename).is_err());
+
+        let temp_dir = TempDir::new("wych_book_tests").unwrap();
+        let file_path = temp_dir.path().join("new_books.csv");
+        let filename = file_path.to_str().unwrap();
+
+        let mut writer = csv::Writer::from_path(filename).unwrap();
+        writer.write_record(vec!["bad", "data"]).unwrap();
+
+        let result = read_csv_file(filename).unwrap();
+        assert!(result.is_empty());
+    }
+
+    #[test]
+    fn test_write_csv_file() {
+        let temp_dir = TempDir::new("wych_book_tests").unwrap();
+        let file_path = temp_dir.path().join("new_books.csv");
+        let filename = file_path.to_str().unwrap();
+
+        let records = vec![BookRecord::new("Franz Kakfa".into(), "The Castle".into(), 1)];
+        let result = write_csv_file(filename, &records);
+        assert!(result.is_ok());
+
+        let read_result = read_csv_file(filename).unwrap();
+        assert_eq!(read_result.len(), 1);
+        assert_eq!(read_result[0], records[0]);
     }
 }
