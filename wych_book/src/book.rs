@@ -21,6 +21,22 @@ impl Book {
             self.weight.to_string(),
         ]
     }
+}
+
+pub enum Header {
+    Author,
+    Title,
+    Weight
+}
+
+impl Header {
+    pub fn value(&self) -> &str {
+        match self {
+            Header::Author => "author",
+            Header::Title => "title",
+            Header::Weight => "weight",
+        }
+    }
 
     pub fn headers() -> [&'static str; 3] {
         ["author", "title", "weight"]
