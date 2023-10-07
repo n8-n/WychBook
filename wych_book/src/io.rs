@@ -1,6 +1,9 @@
 extern crate csv;
 
-use crate::{book::{Book, Header}, book_records::BookRecords};
+use crate::{
+    book::{Book, Header},
+    book_records::BookRecords,
+};
 use std::{error::Error, fs::File};
 
 // TODO: make this configurable
@@ -9,7 +12,7 @@ pub const CSV_PATH: &str = "~/.config/wych_book/books.csv";
 pub fn read_csv_file(filename: &str) -> Result<BookRecords, Box<dyn Error>> {
     let file = File::open(filename)?;
     let mut reader = csv::Reader::from_reader(file);
-    let mut book_records = BookRecords::new();
+    let mut book_records = BookRecords::default();
 
     for result in reader.records() {
         let record = result?;
