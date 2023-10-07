@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use crate::book::Header;
 
 use super::book::Book;
@@ -92,7 +94,23 @@ impl From<Vec<Book>> for BookRecords {
 }
 
 
-// TODO: impl display
+
+impl Display for BookRecords {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let line = str::repeat("-", 80);
+        let [a_len, t_len, w_len] = Header::lens();
+
+        let header = format!("|{:^a_len$}|{:^t_len$}|{:^w_len$}|", "author", "title", "weight");
+
+        let books = self.records().iter()
+            .map(|b| b.print_string())
+            .reduce(|acc, b| format!("{}\n{}", acc, b));
+        let books = books.unwrap_or("".into());
+    
+        let final_string = format!("{line}\n{header}\n{line}\n{books}\n{line}");
+        write!(f, "{final_string}")
+    }
+}
 
 
 //
