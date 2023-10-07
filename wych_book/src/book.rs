@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 #[derive(Debug, Eq, PartialEq, Clone)]
 pub struct Book {
     pub author: String,
@@ -21,6 +23,29 @@ impl Book {
             self.weight.to_string(),
         ]
     }
+
+    /// Create a string of attributes for displaying to console.
+    pub fn print_string(&self) -> String {
+        let author = Self::centre_string(&self.author, Header::Author.print_len());
+        let title = Self::centre_string(&self.title, Header::Title.print_len());
+        let weight = Self::centre_string(&self.weight.to_string(), Header::Weight.print_len());
+
+        format!("|{author}|{title}|{weight}|")
+    }
+
+    fn centre_string(string: &str, space: usize) -> String {
+        if string.len() >= space {
+            return string[..space].to_string();
+        }
+        format!("{:^space$}", string)
+    }
+
+}
+
+impl Display for Book {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {  
+        write!(f, "author: {}, title: {}, weight: {}", self.author, self.title, self.weight)
+    }
 }
 
 pub enum Header {
@@ -41,6 +66,19 @@ impl Header {
     pub fn headers() -> [&'static str; 3] {
         ["author", "title", "weight"]
     }
+
+    pub fn lens() -> [usize; 3] {
+        [Header::Author.print_len(), Header::Title.print_len(), Header::Weight.print_len()]
+    }
+
+    // Max string lengths when printing to console
+    pub fn print_len(&self) -> usize {
+        match self {
+            Header::Author => 24,
+            Header::Title => 42,
+            Header::Weight => 10,
+        }
+    }
 }
 
 //
@@ -57,5 +95,7 @@ mod tests {
             b.as_string_array(),
             ["A. Writer".to_string(), "Title1".into(), "5".into()]
         );
+
+        println!("{}", b.print_string());
     }
 }
