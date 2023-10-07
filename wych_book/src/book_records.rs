@@ -1,3 +1,5 @@
+use crate::book::Header;
+
 use super::book::Book;
 use rand::{prelude::thread_rng, seq::SliceRandom};
 
@@ -25,12 +27,13 @@ impl BookRecords {
         self.records.push(book);
     }
 
-    pub fn sort_by_author(&mut self) {
-        self.records.sort_by_key(|b| b.author.clone());
-    }
-
-    pub fn sort_by_title(&mut self) {
-        self.records.sort_by_key(|b| b.title.clone());
+    pub fn sort_by(&mut self, header: Header) {
+        let r = &mut self.records;
+        match header {
+            Header::Author => r.sort_by_key(|b| b.author.clone()),
+            Header::Title => r.sort_by_key(|b| b.title.clone()),
+            Header::Weight => r.sort_by_key(|b| b.weight),
+        };
     }
 
     /// Selects a random book from the provided list of books, based on the associated weight values.
@@ -137,11 +140,14 @@ mod tests {
     fn test_book_records_sorting() {
         let mut books: BookRecords = books_to_test(vec![5, 1, 4]);
 
-        books.sort_by_author();
+        books.sort_by(Header::Author);
         assert_eq!(collect_weights(&books), vec![1, 5, 4]);
 
-        books.sort_by_title();
+        books.sort_by(Header::Title);
         assert_eq!(collect_weights(&books), vec![5, 4, 1]);
+
+        books.sort_by(Header::Weight);
+        assert_eq!(collect_weights(&books), vec![1, 4, 5]);
     }
 
     #[test]
