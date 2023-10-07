@@ -24,6 +24,10 @@ impl Book {
         ]
     }
 
+    pub fn change_weight(&mut self, new_weight: u8) {
+        self.weight = new_weight;
+    }
+
     /// Create a string of attributes for displaying to console.
     pub fn print_string(&self) -> String {
         let author = Self::centre_string(&self.author, Header::Author.print_len());
@@ -39,19 +43,22 @@ impl Book {
         }
         format!("{:^space$}", string)
     }
-
 }
 
 impl Display for Book {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {  
-        write!(f, "author: {}, title: {}, weight: {}", self.author, self.title, self.weight)
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "author: {}, title: {}, weight: {}",
+            self.author, self.title, self.weight
+        )
     }
 }
 
 pub enum Header {
     Author,
     Title,
-    Weight
+    Weight,
 }
 
 impl Header {
@@ -68,7 +75,11 @@ impl Header {
     }
 
     pub fn lens() -> [usize; 3] {
-        [Header::Author.print_len(), Header::Title.print_len(), Header::Weight.print_len()]
+        [
+            Header::Author.print_len(),
+            Header::Title.print_len(),
+            Header::Weight.print_len(),
+        ]
     }
 
     // Max string lengths when printing to console
@@ -95,7 +106,5 @@ mod tests {
             b.as_string_array(),
             ["A. Writer".to_string(), "Title1".into(), "5".into()]
         );
-
-        println!("{}", b.print_string());
     }
 }

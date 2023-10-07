@@ -5,18 +5,14 @@ use crate::book::Header;
 use super::book::Book;
 use rand::{prelude::thread_rng, seq::SliceRandom};
 
-#[derive(Debug, Eq, PartialEq, Clone)]
+#[derive(Debug, Eq, PartialEq, Clone, Default)]
 pub struct BookRecords {
     records: Vec<Book>,
 }
 
-impl BookRecords {
-    pub fn new() -> Self {
-        BookRecords {
-            records: Vec::<Book>::new(),
-        }
-    }
+const MAX_WEIGHT: u8 = 10;
 
+impl BookRecords {
     pub fn get(&self, index: usize) -> Option<&Book> {
         self.records.get(index)
     }
@@ -61,28 +57,56 @@ impl BookRecords {
     }
 
     pub fn add_book(&mut self, author: &str, title: &str) {
-        self.push(Book { 
-            author: author.to_string(), 
-            title: title.to_string(), 
-            weight: 1 
+        self.push(Book {
+            author: author.to_string(),
+            title: title.to_string(),
+            weight: 1,
         });
     }
 
     /// Can remove book based on index, or title.
     pub fn remove_book(&mut self, input: &str) {
+        let index = self.match_input_to_index(input);
+
+        if let Some(i) = index {
+            self.records.remove(i);
+        }
+    }
+
+    pub fn change_weight(&mut self, input: &str, new_weight: u8) {
+        let index = self.match_input_to_index(input);
+        let new_weight = if new_weight > MAX_WEIGHT {
+            MAX_WEIGHT
+        } else {
+            new_weight
+        };
+
+        if let Some(i) = index {
+            self.records
+                .get_mut(i)
+                .expect("Should be valid index")
+                .change_weight(new_weight);
+        }
+    }
+
+    /// Try parse input into an index of BookRecords.
+    /// If input parses into an int, check if it refers to an valid records index.
+    /// If it is a string, search for a matching book title and return the index.
+    fn match_input_to_index(&self, input: &str) -> Option<usize> {
         let parse: Result<usize, _> = input.parse();
-        let records = &mut self.records;
-        let remove = |r: &mut Vec<Book>, i: usize| if i < r.len() { r.remove(i); };
 
         if let Ok(index) = parse {
-            remove(records, index);
-            return;
-        }
-
-        // get index title
-        let result = records.iter().enumerate().find(|b| b.1.title == input);
-        if let Some(result) = result {
-            remove(records, result.0);
+            if self.records().len() > index {
+                Some(index)
+            } else {
+                None
+            }
+        } else {
+            self.records()
+                .iter()
+                .enumerate()
+                .find(|b| b.1.title == input)
+                .map(|result| result.0)
         }
     }
 }
@@ -93,25 +117,27 @@ impl From<Vec<Book>> for BookRecords {
     }
 }
 
-
-
 impl Display for BookRecords {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let line = str::repeat("-", 80);
         let [a_len, t_len, w_len] = Header::lens();
 
-        let header = format!("|{:^a_len$}|{:^t_len$}|{:^w_len$}|", "author", "title", "weight");
+        let header = format!(
+            "|{:^a_len$}|{:^t_len$}|{:^w_len$}|",
+            "author", "title", "weight"
+        );
 
-        let books = self.records().iter()
+        let books = self
+            .records()
+            .iter()
             .map(|b| b.print_string())
             .reduce(|acc, b| format!("{}\n{}", acc, b));
         let books = books.unwrap_or("".into());
-    
+
         let final_string = format!("{line}\n{header}\n{line}\n{books}\n{line}");
         write!(f, "{final_string}")
     }
 }
-
 
 //
 //
@@ -123,7 +149,11 @@ mod tests {
     fn books_to_test(weights: Vec<u8>) -> BookRecords {
         vec![
             Book::new("B. B. Author".into(), "A Title2".into(), weights[0]),
-            Book::new("A. Something Writer".into(), "The Title1".into(), weights[1]),
+            Book::new(
+                "A. Something Writer".into(),
+                "The Title1".into(),
+                weights[1],
+            ),
             Book::new("C. A. Hack".into(), "Bad Title3".into(), weights[2]),
         ]
         .into()
@@ -133,7 +163,6 @@ mod tests {
     fn collect_weights(books: &BookRecords) -> Vec<u8> {
         books.records.iter().map(|b| b.weight).collect()
     }
-
 
     #[test]
     fn test_weighted_index_vector() {
@@ -180,5 +209,24 @@ mod tests {
         books.remove_book(book_title);
         books.remove_book("Non-existent title"); // does nothing
         assert_eq!(collect_weights(&books), vec![3, 2]);
+    }
+
+    #[test]
+    fn test_change_weight() {
+        let mut books: BookRecords = books_to_test(vec![3, 2, 0]);
+        books.change_weight("0", 8);
+        assert_eq!(collect_weights(&books), vec![8, 2, 0]);
+
+        let book_title = &books.get(2).unwrap().title.clone();
+        books.change_weight(book_title, 3);
+        assert_eq!(collect_weights(&books), vec![8, 2, 3]);
+
+        books.change_weight("1", 80); // 80 changed to MAX_WEIGHT
+        assert_eq!(collect_weights(&books), vec![8, MAX_WEIGHT, 3]);
+
+        // does nothing
+        books.change_weight("10", 8); // index doesn't exist
+        books.change_weight("Non-existent title", 8); // book doesn't exist
+        assert_eq!(collect_weights(&books), vec![8, MAX_WEIGHT, 3]);
     }
 }
