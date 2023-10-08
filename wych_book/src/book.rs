@@ -29,12 +29,14 @@ impl Book {
     }
 
     /// Create a string of attributes for displaying to console.
-    pub fn print_string(&self) -> String {
-        let author = Self::centre_string(&self.author, Header::Author.print_len());
-        let title = Self::centre_string(&self.title, Header::Title.print_len());
-        let weight = Self::centre_string(&self.weight.to_string(), Header::Weight.print_len());
+    pub fn print_string(&self, index: usize) -> String {
+        let [i_len, a_len, t_len, w_len] = Header::lens();
+        let author = Self::centre_string(&self.author, a_len);
+        let title = Self::centre_string(&self.title, t_len);
+        let weight = Self::centre_string(&self.weight.to_string(), w_len);
+        let index = Self::centre_string(&index.to_string(), i_len);
 
-        format!("|{author}|{title}|{weight}|")
+        format!("|{index}|{author}|{title}|{weight}|")
     }
 
     fn centre_string(string: &str, space: usize) -> String {
@@ -55,7 +57,9 @@ impl Display for Book {
     }
 }
 
+// #[derive(Display)]
 pub enum Header {
+    Index,
     Author,
     Title,
     Weight,
@@ -67,6 +71,7 @@ impl Header {
             Header::Author => "author",
             Header::Title => "title",
             Header::Weight => "weight",
+            _ => ""
         }
     }
 
@@ -74,19 +79,22 @@ impl Header {
         ["author", "title", "weight"]
     }
 
-    pub fn lens() -> [usize; 3] {
+    pub fn lens() -> [usize; 4] {
         [
+            Header::Index.print_len(),
             Header::Author.print_len(),
             Header::Title.print_len(),
             Header::Weight.print_len(),
         ]
     }
 
-    // Max string lengths when printing to console
+    // Max string lengths when printing to console.
+    // Sums to 75. (80 - 5 line characters between headers.)
     pub fn print_len(&self) -> usize {
         match self {
-            Header::Author => 24,
-            Header::Title => 42,
+            Header::Index => 4,
+            Header::Author => 21,
+            Header::Title => 40,
             Header::Weight => 10,
         }
     }

@@ -31,6 +31,7 @@ impl BookRecords {
             Header::Author => r.sort_by_key(|b| b.author.clone()),
             Header::Title => r.sort_by_key(|b| b.title.clone()),
             Header::Weight => r.sort_by_key(|b| b.weight),
+            _ => ()
         };
     }
 
@@ -120,17 +121,18 @@ impl From<Vec<Book>> for BookRecords {
 impl Display for BookRecords {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let line = str::repeat("-", 80);
-        let [a_len, t_len, w_len] = Header::lens();
+        let [i_len, a_len, t_len, w_len] = Header::lens();
 
         let header = format!(
-            "|{:^a_len$}|{:^t_len$}|{:^w_len$}|",
-            "author", "title", "weight"
+            "|{:^i_len$}|{:^a_len$}|{:^t_len$}|{:^w_len$}|",
+            "", "author", "title", "weight"
         );
 
         let books = self
             .records()
             .iter()
-            .map(|b| b.print_string())
+            .enumerate()
+            .map(|(i, b)| b.print_string(i))
             .reduce(|acc, b| format!("{}\n{}", acc, b));
         let books = books.unwrap_or("".into());
 
