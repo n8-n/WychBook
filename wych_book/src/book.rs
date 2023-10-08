@@ -75,6 +75,15 @@ impl Header {
         }
     }
 
+    pub fn from(s: &str) -> Result<Self, &'static str> {
+        match s {
+           "author" => Ok(Header::Author),
+           "title" => Ok(Header::Title),
+           "weight" => Ok(Header::Weight),
+           _ => Err("Invalid sort column choice")
+        }
+    }
+
     pub fn headers() -> [&'static str; 3] {
         ["author", "title", "weight"]
     }
