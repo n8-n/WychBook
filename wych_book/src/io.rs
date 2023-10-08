@@ -54,6 +54,8 @@ mod tests {
         let result = read_csv_file(&filename).unwrap();
         assert_eq!(4, result.records().len());
 
+        println!("{result}");
+
         let record = Book::new(
             "Franz Kakfa".into(),
             "The Metamorphosis, and other stories".into(),
