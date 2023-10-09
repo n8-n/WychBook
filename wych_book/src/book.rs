@@ -71,16 +71,16 @@ impl Header {
             Header::Author => "author",
             Header::Title => "title",
             Header::Weight => "weight",
-            _ => ""
+            _ => "",
         }
     }
 
     pub fn from(s: &str) -> Result<Self, &'static str> {
         match s {
-           "author" => Ok(Header::Author),
-           "title" => Ok(Header::Title),
-           "weight" => Ok(Header::Weight),
-           _ => Err("Invalid sort column choice")
+            "author" => Ok(Header::Author),
+            "title" => Ok(Header::Title),
+            "weight" => Ok(Header::Weight),
+            _ => Err("Invalid sort column choice"),
         }
     }
 

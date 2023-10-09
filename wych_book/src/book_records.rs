@@ -31,7 +31,7 @@ impl BookRecords {
             Header::Author => r.sort_by_key(|b| b.author.clone()),
             Header::Title => r.sort_by_key(|b| b.title.clone()),
             Header::Weight => r.sort_by_key(|b| b.weight),
-            _ => ()
+            _ => (),
         };
     }
 
@@ -65,24 +65,40 @@ impl BookRecords {
         });
     }
 
+    pub fn get_book(&self, input: &str) -> Option<&Book> {
+        let result = self.get_book_from_input(input);
+
+        if let Some((_, book)) = result {
+            return Some(book);
+        }
+
+        None
+    }
+
     /// Can remove book based on index, or title.
     pub fn remove_book(&mut self, input: &str) {
-        let index = self.match_input_to_index(input);
+        let result = self.get_book_from_input(input);
 
-        if let Some(i) = index {
+        if let Some((i, _)) = result {
             self.records.remove(i);
         }
     }
 
+    /// Reset weight of all books to 1.
+    pub fn reset_weights(&mut self) {
+        self.records.iter_mut().for_each(|b| b.change_weight(1));
+    }
+
     pub fn change_weight(&mut self, input: &str, new_weight: u8) {
-        let index = self.match_input_to_index(input);
         let new_weight = if new_weight > MAX_WEIGHT {
             MAX_WEIGHT
         } else {
             new_weight
         };
 
-        if let Some(i) = index {
+        let result = self.get_book_from_input(input);
+
+        if let Some((i, _)) = result {
             self.records
                 .get_mut(i)
                 .expect("Should be valid index")
@@ -91,23 +107,20 @@ impl BookRecords {
     }
 
     /// Try parse input into an index of BookRecords.
-    /// If input parses into an int, check if it refers to an valid records index.
-    /// If it is a string, search for a matching book title and return the index.
-    fn match_input_to_index(&self, input: &str) -> Option<usize> {
+    /// If input parses into an int, check if it refers to an valid records index and return book with its index.
+    /// Else if it is a string, search for a matching book title and return it if it exists.
+    fn get_book_from_input(&self, input: &str) -> Option<(usize, &Book)> {
         let parse: Result<usize, _> = input.parse();
 
         if let Ok(index) = parse {
             if self.records().len() > index {
-                Some(index)
+                let book_ref = self.records.get(index).expect("Should exist at index");
+                Some((index, book_ref))
             } else {
                 None
             }
         } else {
-            self.records()
-                .iter()
-                .enumerate()
-                .find(|b| b.1.title == input)
-                .map(|result| result.0)
+            self.records.iter().enumerate().find(|b| b.1.title == input)
         }
     }
 }
@@ -230,5 +243,12 @@ mod tests {
         books.change_weight("10", 8); // index doesn't exist
         books.change_weight("Non-existent title", 8); // book doesn't exist
         assert_eq!(collect_weights(&books), vec![8, MAX_WEIGHT, 3]);
+    }
+
+    #[test]
+    fn test_reset_weights() {
+        let mut books: BookRecords = books_to_test(vec![3, 2, 0]);
+        books.reset_weights();
+        assert_eq!(collect_weights(&books), vec![1; 3]);
     }
 }
