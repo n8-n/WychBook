@@ -9,11 +9,6 @@ pub struct Cli {
 
 #[derive(Subcommand)]
 pub enum Commands {
-    
-    /// List all books in CSV file
-    #[command()]
-    List,
-
     /// Add book to list
     #[command()]
     Add {
@@ -23,7 +18,31 @@ pub enum Commands {
 
         /// Title of book
         #[arg(short, long, value_name = "TITLE")]
-        title: String
+        title: String,
+    },
+
+    /// Delete book from list
+    #[command()]
+    Delete {
+        /// Title or index of book
+        #[arg(short = 'b', long = "book", value_name = "TITLE | INDEX")]
+        input: String,
+
+        /// Auto-confirm deletion check
+        #[arg(short = 'y', long = "yes")]
+        auto_confirm: bool
+    },
+
+    /// List all books in CSV file
+    #[command()]
+    List,
+
+    /// Reset weight of all books to 1
+    #[command()]
+    Reset {
+        /// Auto-confirm reset check
+        #[arg(short = 'y', long = "yes")]
+        confirm: Option<bool>,
     },
 
     /// Sort book list
@@ -31,21 +50,9 @@ pub enum Commands {
     Sort {
         /// Column to order by
         #[arg(short = 'o', long = "order", value_name = "ORDER BY")]
-        input: String
-    },
-    
-    /// Delete book from list
-    #[command()]
-    Delete {
-        /// Title or index of book
-        #[arg(short = 'b', long = "book", value_name = "TITLE | INDEX")]
-        input: String
+        input: String,
     },
 
-    /// Select a random book based on weight values
-    #[command()]
-    Wych,
-    
     /// Modify a books weight
     #[command()]
     Weight {
@@ -54,6 +61,10 @@ pub enum Commands {
         input: String,
         /// Weight to assign to book
         #[arg(short, long, value_name = "WEIGHT")]
-        weight: u8
-    }
+        weight: u8,
+    },
+
+    /// Select a random book based on weight values
+    #[command()]
+    Wych,
 }
