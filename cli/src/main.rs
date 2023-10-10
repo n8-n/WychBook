@@ -1,12 +1,11 @@
-use std::{error::Error, process};
 use clap::Parser;
 use cli::{Cli, Commands};
+use std::{error::Error, process};
 use wych_book::book::{Book, Header};
 
 mod cli;
 
 // TODO:
-//  - Command to reset weights
 //  - Create file if it doesn't exist.
 //  - Option to point to file path
 //  - Config file: default books list
@@ -43,8 +42,10 @@ fn run(cli_args: Cli) -> Result<(), Box<dyn Error>> {
             }
         }
         Commands::List => (),
-        Commands::Reset { confirm: _ } => {
-            todo!()
+        Commands::Reset { auto_confirm } => {
+            if should_reset_weights(auto_confirm)? {
+                books.reset_weights();
+            }
         }
         Commands::Sort { input } => {
             let header = Header::from(&input)?;
@@ -65,11 +66,11 @@ fn run(cli_args: Cli) -> Result<(), Box<dyn Error>> {
     wych_book::io::write_csv_file(filename, &books)
 }
 
-fn should_delete(book: Option<&Book>, auto_confirm: bool) -> Result<bool, Box<dyn Error>>  {
+fn should_delete(book: Option<&Book>, auto_confirm: bool) -> Result<bool, Box<dyn Error>> {
     if auto_confirm {
         return Ok(true);
     }
-    
+
     if book.is_none() {
         eprintln!("No book to delete");
         return Ok(false);
@@ -77,25 +78,25 @@ fn should_delete(book: Option<&Book>, auto_confirm: bool) -> Result<bool, Box<dy
     let book = book.unwrap();
 
     println!("[Y/n] Delete book: {} by {}?", book.title, book.author);
+    prompt_for_choice()
+}
+
+fn should_reset_weights(auto_confirm: bool) -> Result<bool, Box<dyn Error>> {
+    if auto_confirm {
+        return Ok(true);
+    }
+
+    println!("[Y/n] Reset weight to 1 for all books?");
+    prompt_for_choice()
+}
+
+fn prompt_for_choice() -> Result<bool, Box<dyn Error>> {
     let mut input = String::new();
-    std::io::stdin()
-        .read_line(&mut input)?;
+    std::io::stdin().read_line(&mut input)?;
 
     match input.trim() {
         "Y" | "y" => Ok(true),
         "N" | "n" => Ok(false),
-        _ => Err("Invalid user input. Valid choices are [Y/n]".into())
-    }
-}
-
-//
-//
-//
-#[cfg(test)]
-mod tests {
-
-    #[test]
-    fn test() {
-        println!("test");
+        _ => Err("Invalid user input. Valid choices are [Y/n]".into()),
     }
 }

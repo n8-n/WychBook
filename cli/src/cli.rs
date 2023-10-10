@@ -42,7 +42,7 @@ pub enum Commands {
     Reset {
         /// Auto-confirm reset check
         #[arg(short = 'y', long = "yes")]
-        confirm: Option<bool>,
+        auto_confirm: bool,
     },
 
     /// Sort book list
