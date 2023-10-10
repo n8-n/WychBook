@@ -7,7 +7,7 @@ use crate::{
 use std::{error::Error, fs::File};
 
 // TODO: make this configurable
-pub const CSV_PATH: &str = "/home/nathan/.config/wych_book/books.csv";
+pub const CSV_PATH: &str = "/home/nflynn/.config/wych_book/books.csv";
 
 pub fn read_csv_file(filename: &str) -> Result<BookRecords, Box<dyn Error>> {
     let file = File::open(filename)?;
