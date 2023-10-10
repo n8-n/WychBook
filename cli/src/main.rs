@@ -1,8 +1,7 @@
 use std::{error::Error, process};
-
 use clap::Parser;
 use cli::{Cli, Commands};
-use wych_book::{book::Header, io};
+use wych_book::book::{Book, Header};
 
 mod cli;
 
@@ -25,12 +24,12 @@ fn main() {
 fn run(cli_args: Cli) -> Result<(), Box<dyn Error>> {
     println!();
 
-    let filename = io::CSV_PATH;
+    let filename = wych_book::io::CSV_PATH;
     // let _ = OpenOptions::new()
     //     .create_new(true)
     //     .open(filename);
 
-    let mut books = io::read_csv_file(filename)?;
+    let mut books = wych_book::io::read_csv_file(filename)?;
 
     match cli_args.command {
         Commands::Add { author, title } => books.add_book(&author, &title),
@@ -39,20 +38,7 @@ fn run(cli_args: Cli) -> Result<(), Box<dyn Error>> {
             auto_confirm,
         } => {
             let book = books.get_book(&input);
-            if book.is_none() {
-                eprintln!("No book to delete");
-                // return early
-            }
-            let book = book.expect("Should exists");
-
-            let will_delete = if auto_confirm {
-                true
-            } else {
-                println!("[Y/n] Delete book: {} by {}?", book.title, book.author);
-                true // TODO: get user input
-            };
-
-            if will_delete {
+            if should_delete(book, auto_confirm)? {
                 books.remove_book(&input);
             }
         }
@@ -76,11 +62,30 @@ fn run(cli_args: Cli) -> Result<(), Box<dyn Error>> {
 
     println!("{books}\n");
 
-    io::write_csv_file(filename, &books)
+    wych_book::io::write_csv_file(filename, &books)
 }
 
-fn delete_book(input: String, auto_confirm: bool) {
+fn should_delete(book: Option<&Book>, auto_confirm: bool) -> Result<bool, Box<dyn Error>>  {
+    if auto_confirm {
+        return Ok(true);
+    }
+    
+    if book.is_none() {
+        eprintln!("No book to delete");
+        return Ok(false);
+    }
+    let book = book.unwrap();
 
+    println!("[Y/n] Delete book: {} by {}?", book.title, book.author);
+    let mut input = String::new();
+    std::io::stdin()
+        .read_line(&mut input)?;
+
+    match input.trim() {
+        "Y" | "y" => Ok(true),
+        "N" | "n" => Ok(false),
+        _ => Err("Invalid user input. Valid choices are [Y/n]".into())
+    }
 }
 
 //

@@ -30,7 +30,7 @@ pub enum Commands {
 
         /// Auto-confirm deletion check
         #[arg(short = 'y', long = "yes")]
-        auto_confirm: bool
+        auto_confirm: bool,
     },
 
     /// List all books in CSV file
