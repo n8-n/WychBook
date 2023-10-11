@@ -5,9 +5,13 @@ use clap::{Parser, Subcommand};
 pub struct Cli {
     #[command(subcommand)]
     pub command: Commands,
+
+    /// Suppress printing of table, unless `list` is called
+    #[arg(short, long)]
+    pub quiet: bool
 }
 
-#[derive(Subcommand)]
+#[derive(Subcommand, PartialEq, Eq)]
 pub enum Commands {
     /// Add book to list
     #[command()]
@@ -33,7 +37,7 @@ pub enum Commands {
         auto_confirm: bool,
     },
 
-    /// List all books in CSV file
+    /// List table of books
     #[command()]
     List,
 

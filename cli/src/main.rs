@@ -10,6 +10,7 @@ mod cli;
 //  - Option to point to file path
 //  - Config file: default books list
 //  - Add integration tests
+//  - multi-line titles / authors
 
 fn main() {
     let cli = Cli::parse();
@@ -29,6 +30,7 @@ fn run(cli_args: Cli) -> Result<(), Box<dyn Error>> {
     //     .open(filename);
 
     let mut books = wych_book::io::read_csv_file(filename)?;
+    let mut print_list = !cli_args.quiet;   // if quiet, don't print list
 
     match cli_args.command {
         Commands::Add { author, title } => books.add_book(&author, &title),
@@ -41,7 +43,7 @@ fn run(cli_args: Cli) -> Result<(), Box<dyn Error>> {
                 books.remove_book(&input);
             }
         }
-        Commands::List => (),
+        Commands::List => print_list = true,
         Commands::Reset { auto_confirm } => {
             if should_reset_weights(auto_confirm)? {
                 books.reset_weights();
@@ -61,7 +63,9 @@ fn run(cli_args: Cli) -> Result<(), Box<dyn Error>> {
         }
     };
 
-    println!("{books}\n");
+    if print_list {
+        println!("{books}\n");
+    }
 
     wych_book::io::write_csv_file(filename, &books)
 }
