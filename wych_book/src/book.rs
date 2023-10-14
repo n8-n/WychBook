@@ -31,19 +31,55 @@ impl Book {
     /// Create a string of attributes for displaying to console.
     pub fn print_string(&self, index: usize) -> String {
         let [i_len, a_len, t_len, w_len] = Header::lens();
-        let author = Self::centre_string(&self.author, a_len);
-        let title = Self::centre_string(&self.title, t_len);
-        let weight = Self::centre_string(&self.weight.to_string(), w_len);
-        let index = Self::centre_string(&index.to_string(), i_len);
 
-        format!("|{index}|{author}|{title}|{weight}|")
-    }
+        // if these are greater than one, we'll need to multiline print
+        let author_div = (self.author.len() as f32 / a_len as f32).ceil() as usize;
+        let title_div = (self.title.len() as f32 / t_len as f32).ceil() as usize;
+        let mut lines = if author_div >= title_div {
+            author_div
+        } else {
+            title_div
+        };
 
-    fn centre_string(string: &str, space: usize) -> String {
-        if string.len() >= space {
-            return string[..space].to_string();
+        let mut print_string = String::new();
+
+        let mut author = self.author.clone();
+        let mut title = self.title.clone();
+        let mut weight = self.weight.to_string();
+        let mut index = index.to_string();
+
+        while lines > 0 {
+            let formatted = format!(
+                "|{}|{}|{}|{}|",
+                centre(&index, i_len),
+                centre(&author, a_len),
+                centre(&title, t_len),
+                centre(&weight, w_len)
+            );
+
+            print_string.push_str(&formatted);
+
+            if lines > 1 {
+                print_string.push('\n');
+                weight = "".to_string();
+                index = "".to_string();
+
+                author = if author_div > 1 {
+                    author[a_len..].to_string()
+                } else {
+                    "".to_string()
+                };
+
+                title = if title_div > 1 {
+                    title[t_len..].to_string()
+                } else {
+                    "".to_string()
+                }
+            }
+            lines -= 1;
         }
-        format!("{:^space$}", string)
+
+        print_string
     }
 }
 
@@ -57,7 +93,15 @@ impl Display for Book {
     }
 }
 
-// #[derive(Display)]
+fn centre(string: &str, space: usize) -> String {
+    let print_str = if string.len() >= space {
+        &string[..space]
+    } else {
+        string
+    };
+    format!("{:^space$}", print_str)
+}
+
 pub enum Header {
     Index,
     Author,
@@ -123,5 +167,22 @@ mod tests {
             b.as_string_array(),
             ["A. Writer".to_string(), "Title1".into(), "5".into()]
         );
+    }
+
+    #[test]
+    fn test_print() {
+        let b = Book::new("A. Writer".into(), "Title1".into(), 5);
+        let result = "| 0  |      A. Writer      |                 Title1                 |    5     |";
+        assert_eq!(result, b.print_string(0));
+
+        let b = Book::new(
+            "Anonymous Secretive Writer".into(),
+            "Let this be the too long title of their debut: A Novel in multiple parts".into(),
+            5,
+        );
+        let result = 
+        "| 0  |Anonymous Secretive W|Let this be the too long title of their |    5     |
+|    |        riter        |    debut: A Novel in multiple parts    |          |";
+        assert_eq!(result, b.print_string(0));
     }
 }

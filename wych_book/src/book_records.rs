@@ -146,10 +146,12 @@ impl Display for BookRecords {
             .iter()
             .enumerate()
             .map(|(i, b)| b.print_string(i))
-            .reduce(|acc, b| format!("{}\n{}", acc, b));
+            .reduce(|acc, b| format!("{}\n{}\n{}", acc, line, b));
         let books = books.unwrap_or("".into());
 
-        let final_string = format!("{line}\n{header}\n{line}\n{books}\n{line}");
+        let double_line = str::repeat("=", 80);
+        let full_header = format!("{line}\n{header}\n{double_line}");
+        let final_string = format!("{full_header}\n{books}\n{line}");
         write!(f, "{final_string}")
     }
 }

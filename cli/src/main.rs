@@ -30,7 +30,7 @@ fn run(cli_args: Cli) -> Result<(), Box<dyn Error>> {
     //     .open(filename);
 
     let mut books = wych_book::io::read_csv_file(filename)?;
-    let mut print_list = !cli_args.quiet;   // if quiet, don't print list
+    let mut print_list = !cli_args.quiet; // if quiet, don't print list
 
     match cli_args.command {
         Commands::Add { author, title } => books.add_book(&author, &title),
