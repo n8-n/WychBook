@@ -52,7 +52,7 @@ mod tests {
     fn test_reading_csv_file() {
         let filename = concat!(env!("CARGO_MANIFEST_DIR"), "/resources/test/books.csv");
         let result = read_csv_file(&filename).unwrap();
-        assert_eq!(4, result.records().len());
+        assert_eq!(5, result.records().len());
 
         let record = Book::new(
             "Franz Kakfa".into(),

@@ -8,7 +8,7 @@ pub struct Cli {
 
     /// Suppress printing of table, unless `list` is called
     #[arg(short, long)]
-    pub quiet: bool
+    pub quiet: bool,
 }
 
 #[derive(Subcommand, PartialEq, Eq)]
