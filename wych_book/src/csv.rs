@@ -41,6 +41,14 @@ pub fn write_csv_file(filename: &str, books: &BookRecords) -> Result<(), Box<dyn
     Ok(())
 }
 
+pub fn create_blank_file() {
+    // TODO: file with just headers
+}
+
+pub fn copy_csv_list() {
+    // TODO
+}
+
 //
 //
 //
