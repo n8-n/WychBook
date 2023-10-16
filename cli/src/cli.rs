@@ -13,8 +13,42 @@ pub struct Cli {
 
 #[derive(Subcommand, PartialEq, Eq)]
 pub enum Commands {
+    /// Add, delete, or modify books in your list
+    Book {
+        #[command(subcommand)]
+        command: BookCommand
+    },
+
+    /// Edit your configuration
+    Config {
+        #[command(subcommand)]
+        command: ConfigCommand
+    },
+
+    /// List table of books
+    List,
+
+    /// Reset weight of all books to 1
+    Reset {
+        /// Auto-confirm reset check
+        #[arg(short = 'y', long = "yes")]
+        auto_confirm: bool,
+    },
+
+    /// Sort book list
+    Sort {
+        /// Column to order by
+        #[arg(short = 'o', long = "order", value_name = "ORDER BY")]
+        input: String,
+    },
+
+    /// Select a random book based on weight values
+    Wych,
+}
+
+#[derive(Subcommand, PartialEq, Eq)]
+pub enum BookCommand {
     /// Add book to list
-    #[command()]
     Add {
         /// Author of book
         #[arg(short, long, value_name = "AUTHOR")]
@@ -26,7 +60,6 @@ pub enum Commands {
     },
 
     /// Delete book from list
-    #[command()]
     Delete {
         /// Title or index of book
         #[arg(short = 'b', long = "book", value_name = "TITLE | INDEX")]
@@ -37,28 +70,7 @@ pub enum Commands {
         auto_confirm: bool,
     },
 
-    /// List table of books
-    #[command()]
-    List,
-
-    /// Reset weight of all books to 1
-    #[command()]
-    Reset {
-        /// Auto-confirm reset check
-        #[arg(short = 'y', long = "yes")]
-        auto_confirm: bool,
-    },
-
-    /// Sort book list
-    #[command()]
-    Sort {
-        /// Column to order by
-        #[arg(short = 'o', long = "order", value_name = "ORDER BY")]
-        input: String,
-    },
-
-    /// Modify a books weight
-    #[command()]
+    /// Modify the weight of a books
     Weight {
         /// Title or index of book
         #[arg(short = 'b', long = "book", value_name = "TITLE | INDEX")]
@@ -66,9 +78,37 @@ pub enum Commands {
         /// Weight to assign to book
         #[arg(short, long, value_name = "WEIGHT")]
         weight: u8,
+    }
+}
+
+
+#[derive(Subcommand, PartialEq, Eq)]
+pub enum ConfigCommand {
+    /// Copy a list to a new list
+    Copy {
+        /// List to copy
+        #[arg(short, long, value_name = "LIST")]
+        from: String,
+
+        /// List to create
+        #[arg(short, long, value_name = "NEW LIST")]
+        to: String,
     },
 
-    /// Select a random book based on weight values
-    #[command()]
-    Wych,
+    /// Set a new default list
+    Default {
+        /// List to set as default
+        #[arg(short, long, value_name = "LIST")]
+        name: String,
+    },
+
+    /// List names of all book lists
+    List,
+
+    /// Create a new list
+    New {
+        /// List to create
+        #[arg(short, long, value_name = "LIST")]
+        name: String,
+    },
 }

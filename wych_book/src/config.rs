@@ -36,9 +36,21 @@ pub fn csv_file(filename: &str) -> String {
         file
 }
 
+pub fn change_default() {
+    // TODO
+}
+
+pub fn does_list_exist() {
+    // TODO
+}
+
 impl WychConfig {
     pub fn default_csv(&self) -> String {
         csv_file(&self.default_list)
+    }
+
+    pub fn print_lists(&self) {
+        println!("{:?}", &self.all_lists);
     }
 }
 

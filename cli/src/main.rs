@@ -1,7 +1,10 @@
 use clap::Parser;
-use cli::{Cli, Commands};
+use cli::{BookCommand, Cli, Commands, ConfigCommand};
 use std::{error::Error, process};
-use wych_book::{book::{Book, Header}, config};
+use wych_book::{
+    book::{Book, Header},
+    config,
+};
 
 mod cli;
 
@@ -10,7 +13,6 @@ mod cli;
 //  - Option to point to file path
 //  - Config file: default books list
 //  - Add integration tests
-//  - multi-line titles / authors
 
 fn main() {
     let cli = Cli::parse();
@@ -31,14 +33,28 @@ fn run(cli_args: Cli) -> Result<(), Box<dyn Error>> {
     let mut print_list = !cli_args.quiet; // if quiet, don't print list
 
     match cli_args.command {
-        Commands::Add { author, title } => books.add_book(&author, &title),
-        Commands::Delete {
-            input,
-            auto_confirm,
-        } => {
-            let book = books.get_book(&input);
-            if should_delete(book, auto_confirm)? {
-                books.remove_book(&input);
+        Commands::Book { command } => match command {
+            BookCommand::Add { author, title } => books.add_book(&author, &title),
+            BookCommand::Delete {
+                input,
+                auto_confirm,
+            } => {
+                let book = books.get_book(&input);
+                if should_delete(book, auto_confirm)? {
+                    books.remove_book(&input);
+                }
+            }
+            BookCommand::Weight { input, weight } => books.change_weight(&input, weight),
+        },
+
+        Commands::Config { command } => {
+            print_list = false;
+            match command {
+                // TODO
+                ConfigCommand::Copy { from, to } => {}
+                ConfigCommand::Default { name } => {}
+                ConfigCommand::List => config.print_lists(),
+                ConfigCommand::New { name } => {}
             }
         }
         Commands::List => print_list = true,
@@ -51,7 +67,6 @@ fn run(cli_args: Cli) -> Result<(), Box<dyn Error>> {
             let header = Header::from(&input)?;
             books.sort_by(header);
         }
-        Commands::Weight { input, weight } => books.change_weight(&input, weight),
         Commands::Wych => {
             if let Some(book) = books.select_random_book() {
                 println!("You should read: {} by {}\n", book.title, book.author);
