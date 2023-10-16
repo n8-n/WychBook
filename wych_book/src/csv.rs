@@ -6,12 +6,13 @@ use crate::{
 };
 use std::{error::Error, fs::File};
 
-// TODO: make this configurable
-pub const CSV_PATH: &str = "/home/nflynn/.config/wych_book/books.csv";
-
 pub fn read_csv_file(filename: &str) -> Result<BookRecords, Box<dyn Error>> {
-    let file = File::open(filename)?;
-    let mut reader = csv::Reader::from_reader(file);
+    let file = File::open(filename);
+    if let Err(e) = file {
+        return Err(format!("Cannot open {filename}, {e}").into());
+    };
+
+    let mut reader = csv::Reader::from_reader(file.unwrap());
     let mut book_records = BookRecords::default();
 
     for result in reader.records() {

@@ -1,7 +1,7 @@
 use clap::Parser;
 use cli::{Cli, Commands};
 use std::{error::Error, process};
-use wych_book::book::{Book, Header};
+use wych_book::{book::{Book, Header}, config};
 
 mod cli;
 
@@ -24,12 +24,10 @@ fn main() {
 fn run(cli_args: Cli) -> Result<(), Box<dyn Error>> {
     println!();
 
-    let filename = wych_book::io::CSV_PATH;
-    // let _ = OpenOptions::new()
-    //     .create_new(true)
-    //     .open(filename);
+    let config = config::get_config()?;
+    let filename = config.default_csv();
 
-    let mut books = wych_book::io::read_csv_file(filename)?;
+    let mut books = wych_book::csv::read_csv_file(&filename)?;
     let mut print_list = !cli_args.quiet; // if quiet, don't print list
 
     match cli_args.command {
@@ -67,7 +65,7 @@ fn run(cli_args: Cli) -> Result<(), Box<dyn Error>> {
         println!("{books}\n");
     }
 
-    wych_book::io::write_csv_file(filename, &books)
+    wych_book::csv::write_csv_file(&filename, &books)
 }
 
 fn should_delete(book: Option<&Book>, auto_confirm: bool) -> Result<bool, Box<dyn Error>> {
