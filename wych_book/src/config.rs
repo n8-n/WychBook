@@ -1,5 +1,6 @@
 use std::{
     error::Error,
+    fmt::Display,
     fs::File,
     io::{Read, Write},
 };
@@ -31,13 +32,9 @@ pub fn config_file() -> String {
 
 pub fn csv_file(filename: &str) -> String {
     let mut file = wych_directory();
-        file.push_str(filename);
-        file.push_str(".csv");
-        file
-}
-
-pub fn change_default() {
-    // TODO
+    file.push_str(filename);
+    file.push_str(".csv");
+    file
 }
 
 pub fn does_list_exist() {
@@ -49,8 +46,28 @@ impl WychConfig {
         csv_file(&self.default_list)
     }
 
+    pub fn set_default(&mut self, new_default: &str) {
+        self.default_list = new_default.to_string();
+    }
+
     pub fn print_lists(&self) {
-        println!("{:?}", &self.all_lists);
+        println!("{self}");
+    }
+}
+
+impl Display for WychConfig {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let lists = self
+            .all_lists
+            .iter()
+            .enumerate()
+            .fold(String::new(), |acc, (i, l)| format!("{acc}\t{i}: {l}\n"));
+
+        write!(
+            f,
+            "Default List: {},\nAll Lists:\n{}",
+            self.default_list, lists
+        )
     }
 }
 
@@ -66,7 +83,7 @@ fn read_config(filename: &str) -> Result<WychConfig, Box<dyn Error>> {
     if let Err(e) = file {
         return Err(format!("Cannot open: {filename}, {e}").into());
     };
-    
+
     let mut json = String::new();
     file.unwrap().read_to_string(&mut json)?;
 

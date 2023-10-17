@@ -102,6 +102,13 @@ pub enum ConfigCommand {
         name: String,
     },
 
+    /// Delete a book list
+    Delete {
+        /// List to delete
+        #[arg(short, long, value_name = "LIST")]
+        name: String,
+    },
+
     /// List names of all book lists
     List,
 
