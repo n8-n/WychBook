@@ -52,6 +52,7 @@ fn run(cli_args: Cli) -> Result<(), Box<dyn Error>> {
             match command {
                 // TODO
                 ConfigCommand::Copy { from, to } => {}
+                ConfigCommand::Delete { name } => todo!(),
                 ConfigCommand::Default { name } => {}
                 ConfigCommand::List => config.print_lists(),
                 ConfigCommand::New { name } => {}
