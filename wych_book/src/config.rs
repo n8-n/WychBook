@@ -2,7 +2,7 @@ use std::{
     error::Error,
     fmt::Display,
     fs::File,
-    io::{Read, Write},
+    io::{Read, Write}, path::Path,
 };
 
 use serde::{Deserialize, Serialize};
@@ -15,6 +15,7 @@ pub struct WychConfig {
 
 const CONFIG_DIR: &str = "/.config/wych_book/";
 const CONFIG_FILE: &str = "config.json";
+const LISTS_DIR: &str = "lists/";
 
 pub fn get_config() -> Result<WychConfig, Box<dyn Error>> {
     read_config(&config_file())
@@ -30,15 +31,17 @@ pub fn config_file() -> String {
     config
 }
 
-pub fn csv_file(filename: &str) -> String {
+pub fn csv_file(name: &str) -> String {
     let mut file = wych_directory();
-    file.push_str(filename);
+    file.push_str(LISTS_DIR);
+    file.push_str(name);
     file.push_str(".csv");
     file
 }
 
-pub fn does_list_exist() {
-    // TODO
+pub fn does_list_exist(name: &str) -> bool {
+    let filename = csv_file(name);
+    Path::new(&filename).exists()
 }
 
 impl WychConfig {
@@ -61,11 +64,11 @@ impl Display for WychConfig {
             .all_lists
             .iter()
             .enumerate()
-            .fold(String::new(), |acc, (i, l)| format!("{acc}\t{i}: {l}\n"));
+            .fold(String::new(), |acc, (i, l)| format!("{acc}- {i}: {l}\n"));
 
         write!(
             f,
-            "Default List: {},\nAll Lists:\n{}",
+            "Default List: {}\nAll Lists:\n{}",
             self.default_list, lists
         )
     }
