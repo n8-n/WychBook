@@ -51,11 +51,13 @@ fn run(cli_args: Cli) -> Result<(), Box<dyn Error>> {
             print_list = false;
             match command {
                 // TODO
-                ConfigCommand::Copy { from, to } => {}
-                ConfigCommand::Delete { name } => todo!(),
-                ConfigCommand::Default { name } => {}
+                ConfigCommand::Copy { from: _, to: _ } => {
+                    println!("does list exist? {}", config::does_list_exist("booddks"))
+                },
+                ConfigCommand::Delete { name: _ } => todo!(),
+                ConfigCommand::Default { name: _ } => {}
                 ConfigCommand::List => config.print_lists(),
-                ConfigCommand::New { name } => {}
+                ConfigCommand::New { name: _ } => {}
             }
         }
         Commands::List => print_list = true,

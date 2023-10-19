@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use crate::book::Header;
+use crate::{book::Header, search::IndexSearch};
 
 use super::book::Book;
 use rand::{prelude::thread_rng, seq::SliceRandom};
@@ -66,7 +66,7 @@ impl BookRecords {
     }
 
     pub fn get_book(&self, input: &str) -> Option<&Book> {
-        let result = self.get_book_from_input(input);
+        let result = self.get_from_input(input);
 
         if let Some((_, book)) = result {
             return Some(book);
@@ -77,7 +77,7 @@ impl BookRecords {
 
     /// Can remove book based on index, or title.
     pub fn remove_book(&mut self, input: &str) {
-        let result = self.get_book_from_input(input);
+        let result = self.get_from_input(input);
 
         if let Some((i, _)) = result {
             self.records.remove(i);
@@ -96,7 +96,7 @@ impl BookRecords {
             new_weight
         };
 
-        let result = self.get_book_from_input(input);
+        let result = self.get_from_input(input);
 
         if let Some((i, _)) = result {
             self.records
@@ -105,23 +105,17 @@ impl BookRecords {
                 .change_weight(new_weight);
         }
     }
+}
 
-    /// Try parse input into an index of BookRecords.
-    /// If input parses into an int, check if it refers to an valid records index and return book with its index.
-    /// Else if it is a string, search for a matching book title and return it if it exists.
-    fn get_book_from_input(&self, input: &str) -> Option<(usize, &Book)> {
-        let parse: Result<usize, _> = input.parse();
+impl IndexSearch for BookRecords {
+    type Item = Book;
 
-        if let Ok(index) = parse {
-            if self.records().len() > index {
-                let book_ref = self.records.get(index).expect("Should exist at index");
-                Some((index, book_ref))
-            } else {
-                None
-            }
-        } else {
-            self.records.iter().enumerate().find(|b| b.1.title == input)
-        }
+    fn get_collection(&self) -> &Vec<Self::Item> {
+        self.records()
+    }
+
+    fn is_equal(&self, item: &Self::Item, input: &str) -> bool {
+        item.title == input 
     }
 }
 
