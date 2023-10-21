@@ -2,7 +2,7 @@ use csv;
 
 use crate::{
     book::{Book, Header},
-    book_records::BookRecords,
+    book_records::BookRecords
 };
 use std::{error::Error, fs::File};
 
@@ -41,12 +41,9 @@ pub fn write_csv_file(filename: &str, books: &BookRecords) -> Result<(), Box<dyn
     Ok(())
 }
 
-pub fn create_blank_file() {
-    // TODO: file with just headers
-}
-
-pub fn copy_csv_list() {
-    // TODO
+pub fn create_blank_file(filename: &str) -> Result<(), Box<dyn Error>> {
+    let empty = BookRecords::default();
+    write_csv_file(&filename, &empty)
 }
 
 //

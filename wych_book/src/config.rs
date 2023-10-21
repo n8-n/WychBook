@@ -4,7 +4,7 @@ use std::{
     fs::File,
     io::{Read, Write}, path::Path,
 };
-
+use crate::csv;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -56,6 +56,51 @@ impl WychConfig {
     pub fn print_lists(&self) {
         println!("{self}");
     }
+
+    pub fn add_new_list(&mut self, name: &str) -> Result<(), Box<dyn Error>> {
+        if does_list_exist(name) {
+            println!("List already exists");
+            return Ok(());
+        }
+
+        let filename = csv_file(name);
+        let result = csv::create_blank_file(&filename);
+
+        if result.is_ok() {
+            self.all_lists.push(name.to_string());
+        }
+        result
+    }
+
+    pub fn copy_csv_list(&self, from: &str, to: &str, overwrite: bool) -> Result<(), Box<dyn Error>> {
+        if !does_list_exist(from) {
+            return Err("Cannot copy a non-existent list".into());
+        }
+        if does_list_exist(to) && !overwrite {
+            println!("List {to} already exists, use -o to overwrite.");
+            return Ok(());
+        }
+        // TODO
+        Ok(())
+    }
+
+    /// Check if all the lists in the config file actually exist and remove any that don't.
+    fn validate_config(&mut self) {
+        let existent_lists: Vec<String> = self.all_lists
+            .iter()
+            .filter(|l| does_list_exist(&l))
+            .map(|l| l.to_string())
+            .collect();
+
+        if self.all_lists.len() != existent_lists.len() {
+            self.all_lists = existent_lists;
+        }
+
+        // TODO Validate default list
+        // if !does_list_exist(&self.default_list) {
+        //     self.default_list = self.all_lists[0].clone()
+        // }
+    }
 }
 
 impl Display for WychConfig {
@@ -97,7 +142,6 @@ fn read_config(filename: &str) -> Result<WychConfig, Box<dyn Error>> {
 fn write_config(filename: &str, config: &WychConfig) -> Result<(), Box<dyn Error>> {
     let mut file = File::create(filename).unwrap();
     let serialized = serde_json::to_string(config).unwrap();
-    println!("{:?}", serialized);
     write!(file, "{serialized}")?;
     Ok(())
 }
@@ -107,8 +151,19 @@ fn write_config(filename: &str, config: &WychConfig) -> Result<(), Box<dyn Error
 //
 #[cfg(test)]
 mod tests {
+    use std::fs;
     use super::*;
     use tempdir::TempDir;
+
+    fn set_up_home_dir() -> TempDir {
+        let temp_dir = TempDir::new("wych_book_tests").unwrap();
+        let lists_dir = temp_dir.path().join(".config/wych_book/lists/");
+        fs::create_dir_all(lists_dir).unwrap();
+        
+        std::env::set_var("HOME", temp_dir.path().to_str().unwrap());
+
+        temp_dir
+    }
 
     #[test]
     fn test_read_config() {
@@ -151,5 +206,24 @@ mod tests {
         let read_result = read_config(filename).unwrap();
         assert_eq!(read_result.all_lists, config.all_lists);
         assert_eq!(read_result.default_list, config.default_list);
+    }
+
+    #[test]
+    fn test_create_new_list() {
+        let list_name = String::from("books");
+        let mut config = WychConfig {
+            default_list: list_name.clone(),
+            all_lists: vec![list_name.clone()]
+        };
+        
+        let _temp_dir = set_up_home_dir();
+
+        let new_list = "new_list";
+        assert!(config.add_new_list(&new_list).is_ok());
+        assert!(does_list_exist(&new_list));
+        assert!(config.all_lists.contains(&new_list.to_string()));
+
+        // try create again
+        assert!(config.add_new_list(&new_list).is_ok());
     }
 }
