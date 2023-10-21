@@ -93,6 +93,10 @@ pub enum ConfigCommand {
         /// List to create
         #[arg(short, long, value_name = "NEW LIST")]
         to: String,
+
+        /// Overwrite `to` list if it already exists
+        #[arg(short, long)]
+        overwrite: bool,
     },
 
     /// Set a new default list
