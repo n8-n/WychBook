@@ -1,8 +1,8 @@
 use std::fmt::Display;
 
-use crate::{book::Header, search::IndexSearch};
+use super::book::{Header, Book};
+use crate::search::IndexSearch;
 
-use super::book::Book;
 use rand::{prelude::thread_rng, seq::SliceRandom};
 
 #[derive(Debug, Eq, PartialEq, Clone, Default)]

@@ -26,7 +26,7 @@ pub enum Commands {
     },
 
     /// List table of books
-    List,
+    List, 
 
     /// Reset weight of all books to 1
     Reset {
