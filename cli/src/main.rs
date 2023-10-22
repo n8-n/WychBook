@@ -1,10 +1,7 @@
 use clap::Parser;
 use cli::{BookCommand, Cli, Commands, ConfigCommand};
+use wych_book::{io::config, books::book::{Header, Book}};
 use std::{error::Error, process};
-use wych_book::{
-    book::{Book, Header},
-    config
-};
 
 mod cli;
 
@@ -26,10 +23,13 @@ fn main() {
 fn run(cli_args: Cli) -> Result<(), Box<dyn Error>> {
     println!();
 
+    // TODO: create config if doesn't exist
+    // prompt user for default list
+
     let mut config = config::get_config()?;
     let filename = config.default_csv();
 
-    let mut books = wych_book::csv::read_csv_file(&filename)?;
+    let mut books = wych_book::io::csv::read_csv_file(&filename)?;
     let mut print_list = !cli_args.quiet; // if quiet, don't print list
 
     match cli_args.command {
@@ -52,10 +52,10 @@ fn run(cli_args: Cli) -> Result<(), Box<dyn Error>> {
             match command {
                 // TODO
                 ConfigCommand::Copy { from , to , overwrite } => config.copy_csv_list(&from, &to, overwrite)?,
-                ConfigCommand::Delete { name: _ } => todo!(),
+                ConfigCommand::Delete { name } => config.delete_list(&name)?,
                 ConfigCommand::Default { name: _ } => {}
                 ConfigCommand::List => config.print_lists(),
-                ConfigCommand::New { name } => config.add_new_list(&name)?
+                ConfigCommand::New { name } => config.add_new_empty_list(&name)?
             }
         }
         Commands::List => print_list = true,
@@ -81,8 +81,8 @@ fn run(cli_args: Cli) -> Result<(), Box<dyn Error>> {
         println!("{books}\n");
     }
 
-    wych_book::csv::write_csv_file(&filename, &books)?;
-    config::save_config(&config)
+    wych_book::io::csv::write_csv_file(&filename, &books)?;
+    config::save_config(&mut config)
 }
 
 fn should_delete(book: Option<&Book>, auto_confirm: bool) -> Result<bool, Box<dyn Error>> {

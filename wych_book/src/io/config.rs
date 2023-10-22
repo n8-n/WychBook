@@ -4,7 +4,8 @@ use std::{
     fs::File,
     io::{Read, Write}, path::Path,
 };
-use crate::csv;
+use super::csv::{self, read_csv_file, write_csv_file};
+use crate::search::IndexSearch;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -21,7 +22,8 @@ pub fn get_config() -> Result<WychConfig, Box<dyn Error>> {
     read_config(&config_file())
 }
 
-pub fn save_config(config: &WychConfig) -> Result<(), Box<dyn Error>> {
+pub fn save_config(config: &mut WychConfig) -> Result<(), Box<dyn Error>> {
+    config.validate_config();
     write_config(&config_file(), config)
 }
 
@@ -57,7 +59,7 @@ impl WychConfig {
         println!("{self}");
     }
 
-    pub fn add_new_list(&mut self, name: &str) -> Result<(), Box<dyn Error>> {
+    pub fn add_new_empty_list(&mut self, name: &str) -> Result<(), Box<dyn Error>> {
         if does_list_exist(name) {
             println!("List already exists");
             return Ok(());
@@ -72,7 +74,7 @@ impl WychConfig {
         result
     }
 
-    pub fn copy_csv_list(&self, from: &str, to: &str, overwrite: bool) -> Result<(), Box<dyn Error>> {
+    pub fn copy_csv_list(&mut self, from: &str, to: &str, overwrite: bool) -> Result<(), Box<dyn Error>> {
         if !does_list_exist(from) {
             return Err("Cannot copy a non-existent list".into());
         }
@@ -80,8 +82,30 @@ impl WychConfig {
             println!("List {to} already exists, use -o to overwrite.");
             return Ok(());
         }
-        // TODO
+       
+        let from_list = read_csv_file(&csv_file(from))?;
+        write_csv_file(&csv_file(to), &from_list)?;
+        self.all_lists.push(to.to_string());
         Ok(())
+    }
+
+    pub fn delete_list(&mut self, name: &str) -> Result<(), Box<dyn Error>> {
+        if !does_list_exist(name) {
+            return Err("Cannot delete a non-existent list".into());
+        }
+        if name == self.default_list {
+            return Err("Cannot delete default list".into());
+        }
+        let filename = csv_file(name);
+        std::fs::remove_file(filename)?;
+
+        match self.get_from_input(name) {
+            Some((index, _)) => {
+                self.all_lists.remove(index);
+                Ok(())
+            },
+            None => Err("Could not find list".into())
+        }
     }
 
     /// Check if all the lists in the config file actually exist and remove any that don't.
@@ -96,10 +120,13 @@ impl WychConfig {
             self.all_lists = existent_lists;
         }
 
-        // TODO Validate default list
-        // if !does_list_exist(&self.default_list) {
-        //     self.default_list = self.all_lists[0].clone()
-        // }
+        if !does_list_exist(&self.default_list) {
+            self.default_list = if self.all_lists.is_empty() {
+                String::new()
+            } else {
+                self.all_lists[0].clone()
+            }
+        }
     }
 }
 
@@ -116,6 +143,18 @@ impl Display for WychConfig {
             "Default List: {}\nAll Lists:\n{}",
             self.default_list, lists
         )
+    }
+}
+
+impl IndexSearch for WychConfig {
+    type Item = String;
+
+    fn get_collection(&self) -> &Vec<Self::Item> {
+        &self.all_lists
+    }
+
+    fn is_equal(&self, item: &Self::Item, input: &str) -> bool {
+        item == input
     }
 }
 
@@ -219,11 +258,27 @@ mod tests {
         let _temp_dir = set_up_home_dir();
 
         let new_list = "new_list";
-        assert!(config.add_new_list(&new_list).is_ok());
+        assert!(config.add_new_empty_list(&new_list).is_ok());
         assert!(does_list_exist(&new_list));
         assert!(config.all_lists.contains(&new_list.to_string()));
 
         // try create again
-        assert!(config.add_new_list(&new_list).is_ok());
+        assert!(config.add_new_empty_list(&new_list).is_ok());
+    }
+
+    #[test]
+    fn test_validate_config() {
+        let _temp_dir = set_up_home_dir();
+
+        let list_name = String::from("books");
+        let mut config = WychConfig {
+            default_list: String::new(),
+            all_lists: vec![String::from("does_not_exist")]
+        };
+
+        let _ = config.add_new_empty_list(&list_name);
+        config.validate_config();
+        assert!(config.all_lists.len() == 1);
+        assert_eq!(config.default_list, list_name);
     }
 }
