@@ -6,3 +6,6 @@ edition = "2021"
 [dependencies]
 wych_book = { path = "../wych_book" }
 clap = { version = "4.4.6", features = ["derive"] }
+
+[build-dependencies]
+home = "0.5.5"
