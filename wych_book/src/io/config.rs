@@ -212,8 +212,8 @@ fn read_config(filename: &str) -> Result<WychConfig, Box<dyn Error>> {
 }
 
 fn write_config(filename: &str, config: &WychConfig) -> Result<(), Box<dyn Error>> {
-    let mut file = File::create(filename).unwrap();
-    let serialized = serde_json::to_string(config).unwrap();
+    let mut file = File::create(filename)?;
+    let serialized = serde_json::to_string(config)?;
     write!(file, "{serialized}")?;
     Ok(())
 }
