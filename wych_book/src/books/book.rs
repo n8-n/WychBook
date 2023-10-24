@@ -172,7 +172,8 @@ mod tests {
     #[test]
     fn test_print() {
         let b = Book::new("A. Writer".into(), "Title1".into(), 5);
-        let result = "| 0  |      A. Writer      |                 Title1                 |    5     |";
+        let result =
+            "| 0  |      A. Writer      |                 Title1                 |    5     |";
         assert_eq!(result, b.print_string(0));
 
         let b = Book::new(
@@ -180,8 +181,8 @@ mod tests {
             "Let this be the too long title of their debut: A Novel in multiple parts".into(),
             5,
         );
-        let result = 
-        "| 0  |Anonymous Secretive W|Let this be the too long title of their |    5     |
+        let result =
+            "| 0  |Anonymous Secretive W|Let this be the too long title of their |    5     |
 |    |        riter        |    debut: A Novel in multiple parts    |          |";
         assert_eq!(result, b.print_string(0));
     }

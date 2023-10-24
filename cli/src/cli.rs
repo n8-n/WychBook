@@ -16,17 +16,17 @@ pub enum Commands {
     /// Add, delete, or modify books in your list
     Book {
         #[command(subcommand)]
-        command: BookCommand
+        command: BookCommand,
     },
 
     /// Edit your configuration
     Config {
         #[command(subcommand)]
-        command: ConfigCommand
+        command: ConfigCommand,
     },
 
     /// List table of books
-    List, 
+    List,
 
     /// Reset weight of all books to 1
     Reset {
@@ -78,9 +78,8 @@ pub enum BookCommand {
         /// Weight to assign to book
         #[arg(short, long, value_name = "WEIGHT")]
         weight: u8,
-    }
+    },
 }
-
 
 #[derive(Subcommand, PartialEq, Eq)]
 pub enum ConfigCommand {

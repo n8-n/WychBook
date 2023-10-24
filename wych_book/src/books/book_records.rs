@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use super::book::{Header, Book};
+use super::book::{Book, Header};
 use crate::search::IndexSearch;
 
 use rand::{prelude::thread_rng, seq::SliceRandom};
@@ -115,7 +115,7 @@ impl IndexSearch for BookRecords {
     }
 
     fn is_equal(&self, item: &Self::Item, input: &str) -> bool {
-        item.title == input 
+        item.title == input
     }
 }
 

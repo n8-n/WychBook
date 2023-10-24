@@ -1,14 +1,17 @@
 use clap::Parser;
 use cli::{BookCommand, Cli, Commands, ConfigCommand};
-use wych_book::{io::config, books::book::{Header, Book}};
 use std::{error::Error, process};
+use wych_book::{
+    books::book::{Book, Header},
+    io::config,
+};
 
 mod cli;
 
 // TODO:
 //  - Create file if it doesn't exist.
 //  - Option to point to file path
-//  - Config file: default books list
+//  - Better error handling
 //  - Add integration tests
 
 fn main() {
@@ -46,16 +49,18 @@ fn run(cli_args: Cli) -> Result<(), Box<dyn Error>> {
             }
             BookCommand::Weight { input, weight } => books.change_weight(&input, weight),
         },
-
         Commands::Config { command } => {
             print_list = false;
             match command {
-                // TODO
-                ConfigCommand::Copy { from , to , overwrite } => config.copy_csv_list(&from, &to, overwrite)?,
+                ConfigCommand::Copy {
+                    from,
+                    to,
+                    overwrite,
+                } => config.copy_csv_list(&from, &to, overwrite)?,
                 ConfigCommand::Delete { name } => config.delete_list(&name)?,
-                ConfigCommand::Default { name: _ } => {}
+                ConfigCommand::Default { name } => config.set_default(&name)?,
                 ConfigCommand::List => config.print_lists(),
-                ConfigCommand::New { name } => config.add_new_empty_list(&name)?
+                ConfigCommand::New { name } => config.add_new_empty_list(&name)?,
             }
         }
         Commands::List => print_list = true,

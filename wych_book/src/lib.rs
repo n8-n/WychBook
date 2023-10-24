@@ -4,8 +4,8 @@ pub mod books {
 }
 
 pub mod io {
-    pub mod csv;
     pub mod config;
+    pub mod csv;
 }
 
 pub mod search;

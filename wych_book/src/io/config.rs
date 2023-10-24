@@ -1,12 +1,13 @@
+use super::csv::{self, read_csv_file, write_csv_file};
+use crate::search::IndexSearch;
+use serde::{Deserialize, Serialize};
 use std::{
     error::Error,
     fmt::Display,
     fs::File,
-    io::{Read, Write}, path::Path,
+    io::{Read, Write},
+    path::Path,
 };
-use super::csv::{self, read_csv_file, write_csv_file};
-use crate::search::IndexSearch;
-use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WychConfig {
@@ -51,8 +52,12 @@ impl WychConfig {
         csv_file(&self.default_list)
     }
 
-    pub fn set_default(&mut self, new_default: &str) {
+    pub fn set_default(&mut self, new_default: &str) -> Result<(), Box<dyn Error>> {
+        if !does_list_exist(new_default) {
+            return Err("Provided list does not exist".into());
+        }
         self.default_list = new_default.to_string();
+        Ok(())
     }
 
     pub fn print_lists(&self) {
@@ -74,7 +79,12 @@ impl WychConfig {
         result
     }
 
-    pub fn copy_csv_list(&mut self, from: &str, to: &str, overwrite: bool) -> Result<(), Box<dyn Error>> {
+    pub fn copy_csv_list(
+        &mut self,
+        from: &str,
+        to: &str,
+        overwrite: bool,
+    ) -> Result<(), Box<dyn Error>> {
         if !does_list_exist(from) {
             return Err("Cannot copy a non-existent list".into());
         }
@@ -82,7 +92,7 @@ impl WychConfig {
             println!("List {to} already exists, use -o to overwrite.");
             return Ok(());
         }
-       
+
         let from_list = read_csv_file(&csv_file(from))?;
         write_csv_file(&csv_file(to), &from_list)?;
         self.all_lists.push(to.to_string());
@@ -103,16 +113,17 @@ impl WychConfig {
             Some((index, _)) => {
                 self.all_lists.remove(index);
                 Ok(())
-            },
-            None => Err("Could not find list".into())
+            }
+            None => Err("Could not find list".into()),
         }
     }
 
     /// Check if all the lists in the config file actually exist and remove any that don't.
     fn validate_config(&mut self) {
-        let existent_lists: Vec<String> = self.all_lists
+        let existent_lists: Vec<String> = self
+            .all_lists
             .iter()
-            .filter(|l| does_list_exist(&l))
+            .filter(|l| does_list_exist(l))
             .map(|l| l.to_string())
             .collect();
 
@@ -190,15 +201,15 @@ fn write_config(filename: &str, config: &WychConfig) -> Result<(), Box<dyn Error
 //
 #[cfg(test)]
 mod tests {
-    use std::fs;
     use super::*;
+    use std::fs;
     use tempdir::TempDir;
 
     fn set_up_home_dir() -> TempDir {
         let temp_dir = TempDir::new("wych_book_tests").unwrap();
         let lists_dir = temp_dir.path().join(".config/wych_book/lists/");
         fs::create_dir_all(lists_dir).unwrap();
-        
+
         std::env::set_var("HOME", temp_dir.path().to_str().unwrap());
 
         temp_dir
@@ -252,9 +263,9 @@ mod tests {
         let list_name = String::from("books");
         let mut config = WychConfig {
             default_list: list_name.clone(),
-            all_lists: vec![list_name.clone()]
+            all_lists: vec![list_name.clone()],
         };
-        
+
         let _temp_dir = set_up_home_dir();
 
         let new_list = "new_list";
@@ -273,7 +284,7 @@ mod tests {
         let list_name = String::from("books");
         let mut config = WychConfig {
             default_list: String::new(),
-            all_lists: vec![String::from("does_not_exist")]
+            all_lists: vec![String::from("does_not_exist")],
         };
 
         let _ = config.add_new_empty_list(&list_name);
