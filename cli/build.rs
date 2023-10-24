@@ -1,7 +1,4 @@
-use std::{
-    fs,
-    path::Path
-};
+use std::{fs, path::Path};
 
 fn main() {
     // Create config and lists directory
@@ -16,5 +13,5 @@ fn main() {
         fs::write(config_file, config_contents).expect("Cannot write default config file");
     }
 
-    println!("cargo:rerun-if-changed=build.rs"); 
+    println!("cargo:rerun-if-changed=build.rs");
 }
