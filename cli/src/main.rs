@@ -30,7 +30,13 @@ fn run(cli_args: Cli) -> Result<(), Box<dyn Error>> {
     // prompt user for default list
 
     let mut config = config::get_config()?;
-    let filename = config.default_csv();
+    
+    // list_name used for printing; filename for actual list manipulation
+    let (list_name, filename) = if let Some(list) = cli_args.list {
+        (list.clone(), config::csv_file(&list))
+    } else {
+        (config.get_default().to_string(), config.default_csv())
+    };
 
     let mut books = wych_book::io::csv::read_csv_file(&filename)?;
     let mut print_list = !cli_args.quiet; // if quiet, don't print list
@@ -57,11 +63,12 @@ fn run(cli_args: Cli) -> Result<(), Box<dyn Error>> {
                     to,
                     overwrite,
                 } => config.copy_csv_list(&from, &to, overwrite)?,
-                ConfigCommand::Delete { name } => config.delete_list(&name)?,
-                ConfigCommand::Default { name } => config.set_default(&name)?,
-                ConfigCommand::List => config.print_lists(),
+                ConfigCommand::Delete { list } => config.delete_list(&list)?,
+                ConfigCommand::Default { list } => config.set_default(&list)?,
+                ConfigCommand::List => (),
                 ConfigCommand::New { name } => config.add_new_empty_list(&name)?,
             }
+            config.print_lists();
         }
         Commands::List => print_list = true,
         Commands::Reset { auto_confirm } => {
@@ -83,7 +90,9 @@ fn run(cli_args: Cli) -> Result<(), Box<dyn Error>> {
     };
 
     if print_list {
-        println!("{books}\n");
+        let list_print = format!("| List Name: {list_name} |");
+        let print_cap = str::repeat("-", list_print.len());
+        println!("{print_cap}\n{list_print}\n{books}\n");
     }
 
     wych_book::io::csv::write_csv_file(&filename, &books)?;

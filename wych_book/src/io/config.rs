@@ -52,7 +52,17 @@ impl WychConfig {
         csv_file(&self.default_list)
     }
 
-    pub fn set_default(&mut self, new_default: &str) -> Result<(), Box<dyn Error>> {
+    pub fn get_default(&self) -> &str {
+        &self.default_list
+    }
+
+    pub fn set_default(&mut self, input: &str) -> Result<(), Box<dyn Error>> {
+        let new_default = if let Some((_, list)) = self.get_from_input(input) {
+            list
+        } else {
+            return Ok(());
+        };
+
         if !does_list_exist(new_default) {
             return Err("Provided list does not exist".into());
         }
@@ -99,11 +109,17 @@ impl WychConfig {
         Ok(())
     }
 
-    pub fn delete_list(&mut self, name: &str) -> Result<(), Box<dyn Error>> {
+    pub fn delete_list(&mut self, input: &str) -> Result<(), Box<dyn Error>> {
+        let name = if let Some((_, list)) = self.get_from_input(input) {
+            list
+        } else {
+            return Ok(());
+        };
+
         if !does_list_exist(name) {
             return Err("Cannot delete a non-existent list".into());
         }
-        if name == self.default_list {
+        if name == self.get_default() {
             return Err("Cannot delete default list".into());
         }
         let filename = csv_file(name);
