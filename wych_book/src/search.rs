@@ -16,14 +16,13 @@ pub trait IndexSearch {
         let collection = self.get_collection();
 
         if let Ok(index) = parse {
-            let get_result = collection.get(index);
-            if let Some(result) = get_result {
-                Some((index, result))
-            } else {
-                None
-            }
+            collection.get(index)
+                .map(|result| (index, result))
         } else {
-            collection.iter().enumerate().find(|(_, item)| self.is_equal(item, input))
+            collection
+                .iter()
+                .enumerate()
+                .find(|(_, item)| self.is_equal(item, input))
         }
     }
 }
@@ -36,12 +35,14 @@ mod tests {
     use super::*;
 
     struct Tester {
-        collection: Vec<String>
+        collection: Vec<String>,
     }
 
     impl Tester {
         pub fn values() -> Self {
-            Tester { collection: vec!["hello".to_string(), "world".into(), "saluton".into()] }
+            Tester {
+                collection: vec!["hello".to_string(), "world".into(), "saluton".into()],
+            }
         }
     }
 
@@ -56,7 +57,6 @@ mod tests {
             item.as_str() == input
         }
     }
-
 
     #[test]
     fn test_get_with_index() {
