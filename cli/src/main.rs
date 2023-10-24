@@ -9,10 +9,9 @@ use wych_book::{
 mod cli;
 
 // TODO:
-//  - Create file if it doesn't exist.
-//  - Option to point to file path
 //  - Better error handling
-//  - Add integration tests
+//  - Add more unit tests + integration tests
+//  - Readme and docs
 
 fn main() {
     let cli = Cli::parse();
@@ -26,11 +25,13 @@ fn main() {
 fn run(cli_args: Cli) -> Result<(), Box<dyn Error>> {
     println!();
 
-    // TODO: create config if doesn't exist
-    // prompt user for default list
-
     let mut config = config::get_config()?;
-    
+
+    if config.get_default().is_empty() {
+        let default = prompt_for_default_list()?;
+        config.add_new_empty_list(&default)?;       
+    }
+
     // list_name used for printing; filename for actual list manipulation
     let (list_name, filename) = if let Some(list) = cli_args.list {
         (list.clone(), config::csv_file(&list))
@@ -132,4 +133,11 @@ fn prompt_for_choice() -> Result<bool, Box<dyn Error>> {
         "N" | "n" => Ok(false),
         _ => Err("Invalid user input. Valid choices are [Y/n]".into()),
     }
+}
+
+fn prompt_for_default_list() -> Result<String, Box<dyn Error>> {
+    println!("Enter name for default book list: ");
+    let mut input = String::new();
+    std::io::stdin().read_line(&mut input)?;
+    Ok(input.trim().to_string())
 }
