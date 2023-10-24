@@ -29,7 +29,7 @@ fn run(cli_args: Cli) -> Result<(), Box<dyn Error>> {
 
     if config.get_default().is_empty() {
         let default = prompt_for_default_list()?;
-        config.add_new_empty_list(&default)?;       
+        config.add_new_empty_list(&default)?;
     }
 
     // list_name used for printing; filename for actual list manipulation

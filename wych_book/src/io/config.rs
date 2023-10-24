@@ -44,7 +44,9 @@ pub fn csv_file(name: &str) -> String {
 
 pub fn does_list_exist(name: &str) -> bool {
     let filename = csv_file(name);
-    Path::new(&filename).try_exists().expect("Cannot check existence of {filename}")
+    Path::new(&filename)
+        .try_exists()
+        .expect("Cannot check existence of {filename}")
 }
 
 impl WychConfig {
