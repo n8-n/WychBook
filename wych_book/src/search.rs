@@ -16,8 +16,7 @@ pub trait IndexSearch {
         let collection = self.get_collection();
 
         if let Ok(index) = parse {
-            collection.get(index)
-                .map(|result| (index, result))
+            collection.get(index).map(|result| (index, result))
         } else {
             collection
                 .iter()

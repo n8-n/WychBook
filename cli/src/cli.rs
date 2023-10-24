@@ -9,6 +9,10 @@ pub struct Cli {
     /// Suppress printing of table, unless `list` is called
     #[arg(short, long)]
     pub quiet: bool,
+
+    /// Use a list other than the default
+    #[arg(short, long)]
+    pub list: Option<String>,
 }
 
 #[derive(Subcommand, PartialEq, Eq)]
@@ -101,15 +105,15 @@ pub enum ConfigCommand {
     /// Set a new default list
     Default {
         /// List to set as default
-        #[arg(short, long, value_name = "LIST")]
-        name: String,
+        #[arg(short, long, value_name = "NAME | INDEX")]
+        list: String,
     },
 
     /// Delete a book list
     Delete {
         /// List to delete
-        #[arg(short, long, value_name = "LIST")]
-        name: String,
+        #[arg(short, long, value_name = "NAME | INDEX")]
+        list: String,
     },
 
     /// List names of all book lists
