@@ -247,4 +247,17 @@ mod tests {
         books.reset_weights();
         assert_eq!(collect_weights(&books), vec![1; 3]);
     }
+
+    #[test]
+    fn test_get_books() {
+        let mut books = BookRecords::default();
+        books.add_book("Franz Kafka", "The Castle");
+        books.add_book("Yoko Ogawa", "The Memory Police");
+        assert_eq!(2, books.records().len());
+
+        assert_eq!("Franz Kafka", books.get_book("The Castle").unwrap().author);
+        assert_eq!("The Memory Police", books.get_book("1").unwrap().title);
+        assert_eq!(None, books.get_book("100"));
+        assert_eq!(None, books.get_book("Ulysses"));
+    }
 }
