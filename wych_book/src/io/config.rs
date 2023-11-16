@@ -270,7 +270,6 @@ mod tests {
             default_list: "BOOKS".into(),
             all_lists: vec!["BOOKS".to_string()],
         };
-        println!("{:?}", config);
 
         let result = write_config(filename, &config);
         assert!(result.is_ok());
@@ -313,5 +312,37 @@ mod tests {
         config.validate_config();
         assert!(config.all_lists.len() == 1);
         assert_eq!(config.default_list, list_name);
+    }
+
+    #[test]
+    fn test_copy_csv_list() {
+        let _temp_dir = set_up_home_dir();
+        let mut config = WychConfig {
+            default_list: String::new(),
+            all_lists: Vec::new(),
+        };
+
+        let name = "books";
+        let _ = config.add_new_empty_list(name);
+        assert_eq!(name.to_string(), config.default_list);
+        
+        let name2 = "books2";
+        let result = config.copy_csv_list(name, name2, false);
+        assert!(result.is_ok());
+        assert_eq!(config.all_lists, vec![name.to_string(), name2.to_string()]);
+
+        // from list doesn't exist
+        let result = config.copy_csv_list("non-existent", name2, false);
+        assert!(result.is_err());
+
+        // already exists and overwrite is false
+        let result = config.copy_csv_list(name, name2, false);
+        assert!(result.is_ok());
+        assert_eq!(config.all_lists.len(), 2);
+    }
+
+    #[test]
+    fn test_delete_list() {
+
     }
 }
