@@ -111,7 +111,12 @@ impl WychConfig {
 
         let from_list = read_csv_file(&csv_file(from))?;
         write_csv_file(&csv_file(to), &from_list)?;
-        self.all_lists.push(to.to_string());
+
+        let list_name = to.to_string();
+        if !self.all_lists.contains(&list_name) {
+            self.all_lists.push(list_name);
+        }
+
         Ok(())
     }
 
@@ -219,6 +224,7 @@ fn write_config(filename: &str, config: &WychConfig) -> Result<(), Box<dyn Error
 mod tests {
     use super::*;
     use std::fs;
+    use serial_test::serial;
     use tempdir::TempDir;
 
     fn set_up_home_dir() -> TempDir {
@@ -274,6 +280,7 @@ mod tests {
     }
 
     #[test]
+    #[serial]
     fn test_create_new_list() {
         let list_name = String::from("books");
         let mut config = WychConfig {
@@ -293,6 +300,7 @@ mod tests {
     }
 
     #[test]
+    #[serial]
     fn test_validate_config() {
         let _temp_dir = set_up_home_dir();
 
@@ -309,6 +317,7 @@ mod tests {
     }
 
     #[test]
+    #[serial]
     fn test_copy_csv_list() {
         let _temp_dir = set_up_home_dir();
         let mut config = WychConfig {
@@ -333,9 +342,15 @@ mod tests {
         let result = config.copy_csv_list(name, name2, false);
         assert!(result.is_ok());
         assert_eq!(config.all_lists.len(), 2);
+
+        // already exists and overwrite is true
+        let result = config.copy_csv_list(name, name2, true);
+        assert!(result.is_ok());
+        assert_eq!(config.all_lists.len(), 2);
     }
 
     #[test]
+    #[serial]
     fn test_delete_list() {
         let _temp_dir = set_up_home_dir();
         let mut config = WychConfig {
