@@ -116,28 +116,22 @@ impl WychConfig {
     }
 
     pub fn delete_list(&mut self, input: &str) -> Result<(), Box<dyn Error>> {
-        let name = if let Some((_, list)) = self.get_from_input(input) {
-            list
+        self.validate_config();
+
+        let (index, name) = if let Some((index, list_name)) = self.get_from_input(input) {
+            (index, list_name)
         } else {
-            return Ok(());
+            return Err("Cannot delete a non-existent list".into());
         };
 
-        if !does_list_exist(name) {
-            return Err("Cannot delete a non-existent list".into());
-        }
         if name == self.get_default() {
             return Err("Cannot delete default list".into());
         }
+
         let filename = csv_file(name);
         std::fs::remove_file(filename)?;
-
-        match self.get_from_input(name) {
-            Some((index, _)) => {
-                self.all_lists.remove(index);
-                Ok(())
-            }
-            None => Err("Could not find list".into()),
-        }
+        self.all_lists.remove(index);
+        Ok(())
     }
 
     /// Check if all the lists in the config file actually exist and remove any that don't.
@@ -325,7 +319,7 @@ mod tests {
         let name = "books";
         let _ = config.add_new_empty_list(name);
         assert_eq!(name.to_string(), config.default_list);
-        
+
         let name2 = "books2";
         let result = config.copy_csv_list(name, name2, false);
         assert!(result.is_ok());
@@ -343,6 +337,26 @@ mod tests {
 
     #[test]
     fn test_delete_list() {
+        let _temp_dir = set_up_home_dir();
+        let mut config = WychConfig {
+            default_list: String::new(),
+            all_lists: Vec::new(),
+        };
+        let name = "books";
+        let _ = config.add_new_empty_list(name);
+        let name2 = "books2";
+        let _ = config.add_new_empty_list(name2);
 
+        // List does not exist
+        assert!(config.delete_list("blah").is_err());
+
+        // can't delete default list
+        assert!(config.delete_list(name).is_err());
+
+        // happy path delete
+        assert_eq!(config.all_lists.len(), 2);
+        assert!(config.delete_list(name2).is_ok());
+        assert_eq!(does_list_exist(name2), false);
+        assert_eq!(config.all_lists.len(), 1);
     }
 }
