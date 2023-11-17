@@ -60,7 +60,7 @@ pub enum BookCommand {
 
         /// Title of book
         #[arg(short, long, value_name = "TITLE")]
-        title: String,
+        book: String,
     },
 
     /// Delete book from list
@@ -123,6 +123,6 @@ pub enum ConfigCommand {
     New {
         /// List to create
         #[arg(short, long, value_name = "LIST")]
-        name: String,
+        list: String,
     },
 }
