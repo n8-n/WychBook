@@ -46,7 +46,7 @@ fn run(cli_args: Cli) -> Result<(), Box<dyn Error>> {
 
     match cli_args.command {
         Commands::Book { command } => match command {
-            BookCommand::Add { author, title } => books.add_book(&author, &title),
+            BookCommand::Add { author, book } => books.add_book(&author, &book),
             BookCommand::Delete {
                 input,
                 auto_confirm,
@@ -69,7 +69,7 @@ fn run(cli_args: Cli) -> Result<(), Box<dyn Error>> {
                 ConfigCommand::Delete { list } => config.delete_list(&list)?,
                 ConfigCommand::Default { list } => config.set_default(&list)?,
                 ConfigCommand::List => (),
-                ConfigCommand::New { name } => config.add_new_empty_list(&name)?,
+                ConfigCommand::New { list } => config.add_new_empty_list(&list)?,
             }
             config.print_lists();
         }
