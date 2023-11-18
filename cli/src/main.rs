@@ -8,13 +8,6 @@ use wych_book::{
 
 mod cli;
 
-// TODO:
-//  - Better error handling
-//  - Add more unit tests; code coverage
-//  - integration tests
-//  - Readme and docs
-//  - clean up exports / lib pubs
-
 fn main() {
     let cli = Cli::parse();
 
