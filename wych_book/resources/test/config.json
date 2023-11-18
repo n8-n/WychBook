@@ -1,0 +1,8 @@
+{
+    "default_list": "books",
+    "all_lists": [
+        "books",
+        "books2",
+        "books3"
+    ]
+}
