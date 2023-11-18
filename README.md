@@ -3,12 +3,12 @@ A simple app to choose a random book from a user-provided list. User can assign 
 
 
 # Installation
-Clone the git repo:
- > `git clone git@github.com:n8-n/WychBook.git`
+Clone the git repo:  
+`git clone git@github.com:n8-n/WychBook.git`
 
 
-Install using Cargo. To install the CLI tool, use the `--path` parameter:
-> `cargo install --path cli/`
+Install using Cargo. To install the CLI tool, use the `--path` parameter:  
+`cargo install --path cli/`
 
 Note: if you run the CLI tool and get an error saying that `config.json` file could not be found, you can modify the `cli/build.rs` file to trigger cargo to create this file.
 
@@ -89,28 +89,27 @@ The current book list is printed after every command. You can suppress this prin
 
 ## Example Usage
 ### Modifying Book Elements  
-Add a new book to the list:
-> `wych-cli book add -a "Bram Stoker" -b "Dracula"`  
+#### Add a new book to the list:  
+`wych-cli book add -a "Bram Stoker" -b "Dracula"`  
+`wych-cli --list "other_list" book add -a "Mary Shelley" -b "Frankenstein"`  
+  
+#### Modify the weight of a book:  
+`wych-cli book weight -b "Dracula" -w 3`
+  
+#### Delete a book:  
+`wych-cli book delete --book "Dracula"`
 
-> `wych-cli --list "other_list" book add -a "Mary Shelley" -b "Frankenstein"`
+  
+### Getting a Book Recommendation:  
+`wych-cli wych`
 
-Modify the weight of a book:
-> `wych-cli book weight -b "Dracula" -w 3`
-
-Delete a book:
-> `wych-cli book delete --book "Dracula"`
-
-
-### Getting a Book Recommendation
-> `wych-cli wych`
-
-
+  
 ### Managing Config
-Create a new book list:
-> `wych-cli config new -l other_list`
+#### Create a new book list:  
+`wych-cli config new -l other_list`
 
-Set a new default list:
-> `wych-cli config default -l other_list`
+#### Set a new default list:  
+`wych-cli config default -l other_list`
 
-Delete a list:
-> `wych-cli config delete --list old_list`
+#### Delete a list:  
+`wych-cli config delete --list old_list`
